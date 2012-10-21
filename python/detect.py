@@ -9,23 +9,23 @@ Usage:
 
 import os
 import re
-import codecs
 import math
 import json
 import sys
 import getopt
 
-class Alphabet():
+class Alphabet:
     def __init__(self, json):
         self.data = json
-        self.keys = sorted(list(json.keys()), key=lambda name: json[name]['interval'][0])
+        self.keys = sorted(json.keys(), key=lambda name: json[name]['interval'][0])
+
     def which(self, c):
-        lo=0
-        hi=None
+        lo = 0
+        hi = None
         if hi is None:
             hi = len(self.keys)
         while lo < hi:
-            mid = (lo+hi)//2
+            mid = (lo + hi) // 2
             midval_lower = self.data[self.keys[mid]]['interval'][0]
             midval_upper = self.data[self.keys[mid]]['interval'][1]
             if int(midval_upper, 16) < ord(c):
@@ -35,6 +35,7 @@ class Alphabet():
             else:
                 return self.data[self.keys[mid]]
         return None
+
     def n(self, c):
         seg = self.which(c)
         if seg is None:
@@ -42,18 +43,19 @@ class Alphabet():
         else:
             return seg['n']
 
-class GramGenerator():
+class GramGenerator:
     def __init__(self, alphabet, text):
         self.alphabet = alphabet
         self.text = text
         self.iterator = next_gram(self)
+
     def __iter__(self):
         return self.iterator()
 
 position = -1
 def next_gram(gg):
     global position
-    length   = len(gg.text)
+    length = len(gg.text)
     position = -1
     def gram():
         global position
@@ -64,7 +66,8 @@ def next_gram(gg):
                 raise StopIteration
             c = gg.text[position]
             n = gg.alphabet.n(c)
-            if n < 1: n = 1
+            if n < 1:
+                n = 1
             end = position + n
             if end >= length - 1:
                 position = -1
@@ -73,15 +76,15 @@ def next_gram(gg):
                 yield gg.text[position:end]
     return gram
 
-f = codecs.open(os.path.join(os.path.dirname(__file__), 'meta', 'alphabet.json'), 'r', 'utf-8')
-alphabet = Alphabet(json.loads(str(''.join(f.readlines()))))
+f = open(os.path.join(os.path.dirname(__file__), 'meta', 'alphabet.json'), 'r', encoding='utf-8')
+alphabet = Alphabet(json.loads(''.join(f.readlines())))
 
 langs = ['en', 'ja', 'zh-hans', 'zh-hant']
 
 vectors = {}
 for lang in langs:
     vectors[lang] = {}
-    f = codecs.open(os.path.join(os.path.dirname(__file__), 'data', lang + '.txt'), 'r', 'utf-8')
+    f = open(os.path.join(os.path.dirname(__file__), 'data', lang + '.txt'), 'r', encoding='utf-8')
     for line in f:
         segs = line.split(', 0.')
         if len(segs) == 2:
@@ -100,24 +103,24 @@ def detect(text):
     freq = {}
     gg = GramGenerator(alphabet, text)
     for gram in gg:
-        if gram in list(freq.keys()):
+        if gram in freq.keys():
             freq[gram] = freq[gram] + 1
         else:
             freq[gram] = 1
 
     sq = 0
-    for k in list(freq.keys()):
+    for k in freq.keys():
         sq = sq + freq[k] * freq[k]
     l = math.sqrt(sq)
 
-    for k in list(freq.keys()):
-        freq[k] = float(freq[k]) / l
+    for k in freq.keys():
+        freq[k] = freq[k] / l
 
     sim = {}
     for lang in langs:
         sim[lang] = inner(vectors[lang], freq)
 
-    keys = sorted(list(sim.keys()), key=lambda ind: -sim[ind])
+    keys = sorted(sim.keys(), key=lambda ind: -sim[ind])
     return [(key, sim[key]) for key in keys]
 
 def main():
