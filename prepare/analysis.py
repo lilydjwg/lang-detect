@@ -14,7 +14,7 @@ import json
 class Alphabet():
     def __init__(self, json):
         self.data = json
-        self.keys = sorted(json.keys(), key=lambda name: json[name]['interval'][0])
+        self.keys = sorted(list(json.keys()), key=lambda name: json[name]['interval'][0])
     def which(self, c):
         lo=0
         hi=None
@@ -70,7 +70,7 @@ def next_gram(gg):
     return gram
 
 f = codecs.open('../meta/alphabet.json', 'r', 'utf-8')
-alphabet = Alphabet(json.loads(unicode(''.join(f.readlines()))))
+alphabet = Alphabet(json.loads(str(''.join(f.readlines()))))
 
 langs = ['de', 'en', 'es', 'fr', 'it', 'ja', 'nl', 'pl', 'ru',
          'zh-hans', 'zh-hant', 'zh-yue']
@@ -80,24 +80,24 @@ for lang in langs:
     freq = {}
     for f in os.listdir(lang):
         fpath = os.path.join('.', lang, f)
-        print fpath
+        print(fpath)
         if os.path.isfile(fpath):
             f = codecs.open(fpath, 'r', 'utf-8')
             lines = f.readlines()
-            gg = GramGenerator(alphabet, unicode(''.join(lines)))
+            gg = GramGenerator(alphabet, str(''.join(lines)))
             for gram in gg:
-                if gram in freq.keys():
+                if gram in list(freq.keys()):
                     freq[gram] = freq[gram] + 1
                 else:
                     freq[gram] = 1
 
     sq = 0
-    for k in freq.keys():
+    for k in list(freq.keys()):
         sq = sq + freq[k] * freq[k]
     l = math.sqrt(sq)
 
     f = open('../data/' + lang + '.txt', 'w')
-    keys = sorted(freq.keys(), key=lambda ind: -freq[ind])
+    keys = sorted(list(freq.keys()), key=lambda ind: -freq[ind])
     for k in keys:
         freq[k] = float(freq[k]) / l
         text = k + ', ' + str(freq[k]) + '\n'

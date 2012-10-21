@@ -18,7 +18,7 @@ import getopt
 class Alphabet():
     def __init__(self, json):
         self.data = json
-        self.keys = sorted(json.keys(), key=lambda name: json[name]['interval'][0])
+        self.keys = sorted(list(json.keys()), key=lambda name: json[name]['interval'][0])
     def which(self, c):
         lo=0
         hi=None
@@ -74,7 +74,7 @@ def next_gram(gg):
     return gram
 
 f = codecs.open(os.path.join(os.path.dirname(__file__), 'meta', 'alphabet.json'), 'r', 'utf-8')
-alphabet = Alphabet(json.loads(unicode(''.join(f.readlines()))))
+alphabet = Alphabet(json.loads(str(''.join(f.readlines()))))
 
 langs = ['en', 'ja', 'zh-hans', 'zh-hant']
 
@@ -100,49 +100,46 @@ def detect(text):
     freq = {}
     gg = GramGenerator(alphabet, text)
     for gram in gg:
-        if gram in freq.keys():
+        if gram in list(freq.keys()):
             freq[gram] = freq[gram] + 1
         else:
             freq[gram] = 1
 
     sq = 0
-    for k in freq.keys():
+    for k in list(freq.keys()):
         sq = sq + freq[k] * freq[k]
     l = math.sqrt(sq)
 
-    for k in freq.keys():
+    for k in list(freq.keys()):
         freq[k] = float(freq[k]) / l
 
     sim = {}
     for lang in langs:
         sim[lang] = inner(vectors[lang], freq)
 
-    keys = sorted(sim.keys(), key=lambda ind: -sim[ind])
+    keys = sorted(list(sim.keys()), key=lambda ind: -sim[ind])
     return [(key, sim[key]) for key in keys]
 
 def main():
     # parse command line options
     try:
         opts, args = getopt.getopt(sys.argv[1:], "h", ["help"])
-    except getopt.error, msg:
-        print msg
-        print "for help use --help"
+    except getopt.error as msg:
+        print(msg)
+        print("for help use --help")
         sys.exit(2)
     # process options
     for o, a in opts:
         if o in ("-h", "--help"):
-            print __doc__
+            print(__doc__)
             sys.exit(0)
-    l = sys.stdin.readline()
-    while l:
-        print '==================================='
-        print l
-        text = unicode(codecs.decode(l, 'utf-8'))
-        guessings = detect(text)
+    for l in sys.stdin:
+        print('===================================')
+        print(l)
+        guessings = detect(l)
         for result in guessings:
             lang, sim = result
-            print lang + ':' + str(sim)
-        l = sys.stdin.readline()
+            print(lang + ':' + str(sim))
 
 if __name__ == "__main__":
     main()
