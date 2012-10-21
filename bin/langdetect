@@ -12,4 +12,4 @@ cd `dirname ${CUR}` > /dev/null
 CUR=`pwd`;
 popd  > /dev/null
 
-exec "python" "${CUR}/../python/detect.py" "$@"
+exec "python2" "${CUR}/../python/detect.py" "$@"

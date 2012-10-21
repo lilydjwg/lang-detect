@@ -76,8 +76,7 @@ def next_gram(gg):
 f = codecs.open(os.path.join(os.path.dirname(__file__), 'meta', 'alphabet.json'), 'r', 'utf-8')
 alphabet = Alphabet(json.loads(unicode(''.join(f.readlines()))))
 
-langs = ['de', 'en', 'es', 'fr', 'it', 'ja', 'nl', 'pl', 'ru',
-         'zh-hans', 'zh-hant', 'zh-yue']
+langs = ['en', 'ja', 'zh-hans', 'zh-hant']
 
 vectors = {}
 for lang in langs:
@@ -134,15 +133,16 @@ def main():
         if o in ("-h", "--help"):
             print __doc__
             sys.exit(0)
-    # process arguments
-    for arg in args:
+    l = sys.stdin.readline()
+    while l:
         print '==================================='
-        print arg
-        text = unicode(codecs.decode(arg, 'utf-8'))
+        print l
+        text = unicode(codecs.decode(l, 'utf-8'))
         guessings = detect(text)
         for result in guessings:
             lang, sim = result
             print lang + ':' + str(sim)
+        l = sys.stdin.readline()
 
 if __name__ == "__main__":
     main()
