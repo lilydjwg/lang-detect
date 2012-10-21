@@ -26,8 +26,7 @@ To get the language vector, we use feature articles on Wikipedia as corpus.
 
 cd to the project root
 
-bin/langdetect YOUR_SENTENCE_HERE
-
-
-
-
+```sh
+$ bin/langdetect
+send your sentences to stdin
+```
